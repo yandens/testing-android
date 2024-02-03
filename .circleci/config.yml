@@ -7,18 +7,12 @@ jobs:
       - image: cimg/android:2024.01
     steps:
       - checkout
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum  "app/build.gradle.kts" }}
       - run:
           name: Chmod permissions
           command: sudo chmod +x ./gradlew
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum  "app/build.gradle.kts" }}
       - persist_to_workspace:
           root: .
           paths:
@@ -53,7 +47,10 @@ workflows:
   version: 2
   test-and-build:
     jobs:
-      - prepare
+      - prepare:
+          filters:
+            branches:
+              only: main
       - test:
           requires:
             - prepare
